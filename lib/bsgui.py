@@ -103,6 +103,9 @@ def setCharKeyEventHandler(window, func):
 def setKeyDownEventHandler(window, func):
 	window.frame.Bind(wx.EVT_KEY_DOWN, func)
 
+def setMouseWheelEventHandler(window, func):
+	window.frame.Bind(wx.EVT_MOUSEWHEEL, func)
+
 # Рисует окно на экране.
 def runWindow(window):
 	window.frame.Show(True)

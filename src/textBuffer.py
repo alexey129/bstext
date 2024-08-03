@@ -35,9 +35,12 @@ class Cursor:
 				self.x = buf.viewBufferCopy[buf.cursor.y].length
 
 	def down(self, buf):
-		self.y += 1
-		if self.x > buf.viewBufferCopy[buf.cursor.y].length:
-			self.x = buf.viewBufferCopy[buf.cursor.y].length
+		if self.y == buf.lineCountScreen - 1:
+			pass
+		else:
+			self.y += 1
+			if self.x > buf.viewBufferCopy[buf.cursor.y].length:
+				self.x = buf.viewBufferCopy[buf.cursor.y].length
 
 	def left(self, buf):
 		self.x -= 1
@@ -57,7 +60,11 @@ class Cursor:
 				self.x = 0
 				self.down(buf)
 		else:
-			self.x += 1
+			if self.x + 1 < buf.viewBufferCopy[buf.cursor.y].length + 1:
+				self.x += 1
+			else:
+				self.x = 0
+				self.down(buf)
 
 class TextBuffer:
 	def __init__(self):
@@ -67,8 +74,13 @@ class TextBuffer:
 		# находится на экране.
 		self.viewBufferCopy = []
 		self.lineWidth = 50 # Максимальная длина строки на экране.
+		self.currenUpLineCount = 0 # Номер подстроки считая от начала текста,
+		                           # которая находится на экране на самом верху.
+		self.lineCountScreen = 10 # Максимальное кол-во строк на экране.
 		self.cursor = Cursor()
 		self.cursor.lenghtLine = self.lineWidth
+
+		self.allCountDopLine = 0 # Общее кол-во подстрок на экране.
 
 	def setText(self, text):
 		self.buf = text
@@ -138,9 +150,12 @@ class TextBuffer:
 				offset += len(newStrings[i][j])
 			offset = 0
 
-		self.viewBufferCopy = viewLines
+		#self.viewBufferCopy = viewLines
+		self.allCountDopLine = len(viewLines)
+		self.viewBufferCopy = viewLines[self.currenUpLineCount:
+			self.currenUpLineCount + self.lineCountScreen]
 
-		return viewLines
+		return self.viewBufferCopy
 
 	def addSymbol(self, symbol):
 		"""
@@ -199,3 +214,11 @@ class TextBuffer:
 		# Позиция относительно начала документа
 		res = currentStr.offsetAbs + linePosNum
 		return res
+
+	def scrollUp(self):
+		if self.currenUpLineCount > 0:
+			self.currenUpLineCount -= 1
+
+	def scrollDown(self):
+		if self.currenUpLineCount < self.allCountDopLine - self.lineCountScreen:
+			self.currenUpLineCount += 1

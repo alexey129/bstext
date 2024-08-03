@@ -68,10 +68,24 @@ def main():
 			# Обработка других нажатий клавиш
 			event.Skip()
 
+	def aaa4(event):
+		rotation = event.GetWheelRotation()
+	
+		if rotation > 0:
+			eventDispatcher.emit("keyPress", {
+				"key":"mouseWheelUp",
+			})
+		else:
+			eventDispatcher.emit("keyPress", {
+				"key":"mouseWheelDown",
+			})
+
 	gui.setRenderEventHandler(window, aaa1)
 
 	gui.setCharKeyEventHandler(window, aaa2)
 
 	gui.setKeyDownEventHandler(window, aaa3)
+
+	gui.setMouseWheelEventHandler(window, aaa4)
 
 	gui.runWindow(window)

@@ -29,12 +29,21 @@ class TextBox:
 			self.textBuffer.cursor.right(self.textBuffer, True)
 
 		elif params["key"] == "backspace":
-			self.textBuffer.delSymbol()
-			self.textBuffer.cursor.left(self.textBuffer)
+			if (not(self.textBuffer.cursor.x == 0 and
+				self.textBuffer.cursor.y == 0)):
+					self.textBuffer.delSymbol()
+					self.textBuffer.cursor.left(self.textBuffer)
+
+		elif params["key"] == "mouseWheelUp":
+			self.textBuffer.scrollUp()
+
+		elif params["key"] == "mouseWheelDown":
+			self.textBuffer.scrollDown()
 
 		elif len(params["key"]) == 1:
 			self.textBuffer.addSymbol(params["key"])
 			self.textBuffer.cursor.right(self.textBuffer, False)
+
 		self.window.updateWindow()
 
 	def render(self, window, props, parentProps):
