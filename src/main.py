@@ -64,6 +64,10 @@ def main():
 			eventDispatcher.emit("keyPress", {
 				"key":"backspace",
 			})
+		elif keyCode == wx.WXK_SHIFT:
+			eventDispatcher.emit("keyPress", {
+				"key":"shift",
+			})
 		else:
 			# Обработка других нажатий клавиш
 			event.Skip()
@@ -80,6 +84,16 @@ def main():
 				"key":"mouseWheelDown",
 			})
 
+	def aaa5(event):
+		keyCode = event.GetKeyCode()
+		if keyCode == wx.WXK_SHIFT:
+			eventDispatcher.emit("keyPress", {
+				"key":"shiftRealize",
+			})
+		else:
+			# Обработка других нажатий клавиш
+			event.Skip()
+
 	gui.setRenderEventHandler(window, aaa1)
 
 	gui.setCharKeyEventHandler(window, aaa2)
@@ -87,5 +101,7 @@ def main():
 	gui.setKeyDownEventHandler(window, aaa3)
 
 	gui.setMouseWheelEventHandler(window, aaa4)
+
+	gui.setKeyUpEventHandler(window, aaa5)
 
 	gui.runWindow(window)

@@ -3,6 +3,11 @@ from var_dump import var_dump
 
 import lib.bslib.string as strlib
 
+class Selection:
+	def __init__(self):
+		self.start = 0
+		self.end = 0
+
 class ViewLine:
 	"""
 	Подстрока в тексте, если строка переносится на другую строку.
@@ -81,6 +86,8 @@ class TextBuffer:
 		self.cursor.lenghtLine = self.lineWidth
 
 		self.allCountDopLine = 0 # Общее кол-во подстрок на экране.
+
+		self.selection = None
 
 	def setText(self, text):
 		self.buf = text
@@ -222,3 +229,12 @@ class TextBuffer:
 	def scrollDown(self):
 		if self.currenUpLineCount < self.allCountDopLine - self.lineCountScreen:
 			self.currenUpLineCount += 1
+
+	def addSelectionLeft(self):
+		pass
+
+	def addSelectionRight(self):
+		if self.selection == None:
+			self.selection = Selection()
+			self.selection.start = self.selection.end = self.getCursorPosInDocument()
+		self.selection.end += 1

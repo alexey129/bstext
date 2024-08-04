@@ -103,6 +103,9 @@ def setCharKeyEventHandler(window, func):
 def setKeyDownEventHandler(window, func):
 	window.frame.Bind(wx.EVT_KEY_DOWN, func)
 
+def setKeyUpEventHandler(window, func):
+	window.frame.Bind(wx.EVT_KEY_UP, func)
+
 def setMouseWheelEventHandler(window, func):
 	window.frame.Bind(wx.EVT_MOUSEWHEEL, func)
 

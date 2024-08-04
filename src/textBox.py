@@ -1,6 +1,40 @@
 from src.event import *
 from src.textArea import *
+from src.selection import *
 import lib.bsgui as gui
+from var_dump import var_dump
+
+def keyRight(window, selfa, isShift, textBuffer):
+	if isShift:
+		textBuffer.addSelectionRight()
+		if selfa.selection is None:
+			selfa.selection = Selection(window, textBuffer)
+			selfa.selection.data = selfa.selection.data.set(
+				"x1", textBuffer.cursor.x)
+			selfa.selection.data = selfa.selection.data.set(
+				"y1", textBuffer.cursor.y)
+			selfa.selection.data = selfa.selection.data.set(
+				"x2", textBuffer.cursor.x)
+			selfa.selection.data = selfa.selection.data.set(
+				"y2", textBuffer.cursor.y)
+			selfa.selection.data = selfa.selection.data.set("selectBoxes",
+				SELsetCoordSelection(
+				textBuffer,
+				# Передаем координаты одного и того же символа потому что в
+				# выделении пока нет символов.
+				textBuffer.cursor.x,
+				textBuffer.cursor.y,
+				textBuffer.cursor.x,
+				textBuffer.cursor.y))
+		else:
+			selfa.selection.data = SELaddSelectionRight(
+				selfa.selection.data,
+				textBuffer,
+				textBuffer.cursor.x,
+				textBuffer.cursor.y)
+			print(selfa.selection.data["selectBoxes"])
+	textBuffer.cursor.right(textBuffer, True)
+
 
 class TextBox:
 	def __init__(self, window, textBuffer):
@@ -13,6 +47,9 @@ class TextBox:
 		self.text = {} # Массив со строками которые остается просто нарисовать
 					   # на экране
 		self.textBuffer = textBuffer
+		self.isShiftPressed = False
+
+		self.selection = None
 
 	def keyPressHandler(self, params):
 		self.children["textArea"].eventDispatcher.emit("keyPress")
@@ -23,10 +60,13 @@ class TextBox:
 			self.textBuffer.cursor.down(self.textBuffer)
 
 		elif params["key"] == "left":
+			if self.isShiftPressed:
+				self.textBuffer.addSelectionLeft()
 			self.textBuffer.cursor.left(self.textBuffer)
 
 		elif params["key"] == "right":
-			self.textBuffer.cursor.right(self.textBuffer, True)
+			keyRight(self.window, self, self.isShiftPressed,
+				self.textBuffer)
 
 		elif params["key"] == "backspace":
 			if (not(self.textBuffer.cursor.x == 0 and
@@ -39,6 +79,12 @@ class TextBox:
 
 		elif params["key"] == "mouseWheelDown":
 			self.textBuffer.scrollDown()
+
+		elif params["key"] == "shift":
+			self.isShiftPressed = True
+
+		elif params["key"] == "shiftRealize":
+			self.isShiftPressed = False
 
 		elif len(params["key"]) == 1:
 			self.textBuffer.addSymbol(params["key"])
@@ -54,5 +100,7 @@ class TextBox:
 			"text": props[4],
 			"cursor": self.textBuffer.cursor,
 		}, props)
+		if self.selection is not None:
+			self.selection.render(window, {}, props)
 		# Scrollbar.render(window, self.widget["children"]["scrollbar"],
 		# 	{}, props)
