@@ -4,33 +4,6 @@ from src.selection import *
 import lib.bsgui as gui
 from var_dump import var_dump
 
-def expandDataCoord(selectionRangeCoord, cursorCoord):
-	"""
-	Расширяет выделение до какого то символа. Возвращает новое выделение.
-	TODO: Надо сделать чтоб не только расширяло но и сжимало.
-	"""
-	sx1, sy1, sx2, sy2 = selectionRangeCoord
-	cx, cy = cursorCoord
-	if ((cx < sx1 and cy == sy1) or cy < sy1):
-		return (cx, cy, sx2, sy2)
-	elif ((cx > sx2 and cy == sy2) or cy > sy2):
-		return (sx1, sy1, cx, cy)
-	else:
-		return (sx1, sy1, sx2, sy2)
-
-def setSelectionRange(selectionRangeCoord, cursor):
-	"""
-	Принимает текущее выделение и текущую координату курсора, и возвращает
-	новые координа выделения.
-	"""
-	if selectionRangeCoord is None:
-		# -1 тут нужен чтоб создавать выделение сразу когда впервые сдвинулись
-		# вправо.
-		return (cursor.x - 1, cursor.y, cursor.x, cursor.y)
-	else:
-		return expandDataCoord(selectionRangeCoord, (cursor.x, cursor.y))
-
-
 class TextBox:
 	def __init__(self, window, textBuffer):
 		self.window = window
@@ -49,12 +22,24 @@ class TextBox:
 	def keyPressHandler(self, params):
 		cursor = self.textBuffer.cursor
 		self.children["textArea"].eventDispatcher.emit("keyPress")
+
 		if params["key"] == "up":
-			cursor.up(self.textBuffer)
+			self.textBuffer.cursor.up(self.textBuffer)
+			if self.isShiftPressed:
+				self.textBuffer.addSelectionLeft()
+				self.selection = setSelectionRange(
+					self.selection,
+					self.textBuffer.cursor,
+					"up")
 
 		elif params["key"] == "down":
-			self.selection = keyDown(self.selection, self.isShiftPressed,
-				self.textBuffer)
+			self.textBuffer.cursor.down(self.textBuffer)
+			if self.isShiftPressed:
+				self.textBuffer.addSelectionLeft()
+				self.selection = setSelectionRange(
+					self.selection,
+					self.textBuffer.cursor,
+					"down")
 
 		elif params["key"] == "left":
 			self.textBuffer.cursor.left(self.textBuffer)
@@ -62,7 +47,8 @@ class TextBox:
 				self.textBuffer.addSelectionLeft()
 				self.selection = setSelectionRange(
 					self.selection,
-					self.textBuffer.cursor)
+					self.textBuffer.cursor,
+					"left")
 
 		elif params["key"] == "right":
 			self.textBuffer.cursor.right(self.textBuffer, True)
@@ -70,7 +56,8 @@ class TextBox:
 				self.textBuffer.addSelectionRight()
 				self.selection = setSelectionRange(
 					self.selection,
-					self.textBuffer.cursor)
+					self.textBuffer.cursor,
+					"right")
 
 		elif params["key"] == "backspace":
 			if (not(cursor.x == 0 and
@@ -106,6 +93,7 @@ class TextBox:
 		}, props)
 		if self.selection is not None:
 			selectionRender(window,
-				{"coords": self.selection}, props)
+				{"coords": self.selection,
+				"textBuffer": self.textBuffer.viewBufferCopy}, props)
 		# Scrollbar.render(window, self.widget["children"]["scrollbar"],
 		# 	{}, props)

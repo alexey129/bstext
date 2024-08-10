@@ -5,10 +5,50 @@ from pyrsistent import pvector, pmap
 import lib.bsgui as gui
 from src.event import *
 
+def expandDataCoord(selectionRangeCoord, cursorCoord, direct):
+	"""
+	Расширяет выделение до какого то символа. Возвращает новое выделение.
+	"""
+	sx1, sy1, sx2, sy2 = selectionRangeCoord
+	cx, cy = cursorCoord
+	# Расширяем выделение.
+	# Идем влево/вверх.
+	if ((cx < sx1 and cy == sy1) or cy < sy1):
+		return (cx, cy, sx2, sy2)
+	# Идем вправо/вниз.
+	elif ((cx > sx2 and cy == sy2) or cy > sy2):
+		return (sx1, sy1, cx, cy)
+
+	# Сужаем выделение.
+	# Идем влево/вверх.
+	elif ((direct == "left" or direct == "up") and
+		(((cx == sx2 - 1) and (cy == sy2)) or (sy1 <= cy < sy2))):
+			return (sx1, sy1, cx, cy)
+	# Идем вправо/вниз.
+	elif ((direct == "right" or direct == "down") and
+		(((cx == sx1 + 1) and (cy == sy1)) or (sy1 < cy <= sy2))):
+			return (cx, cy, sx2, sy2)
+	else:
+		return (sx1, sy1, sx2, sy2)
+
+def setSelectionRange(selectionRangeCoord, cursor, direct):
+	"""
+	Принимает текущее выделение и текущую координату курсора, и возвращает
+	новые координа выделения.
+	direct - направление в котором мы двигаемся стрелками.
+	"""
+	if selectionRangeCoord is None:
+		# -1 тут нужен чтоб создавать выделение сразу когда впервые сдвинулись
+		# вправо.
+		return (cursor.x - 1, cursor.y, cursor.x, cursor.y)
+	else:
+		return expandDataCoord(selectionRangeCoord, (cursor.x, cursor.y),
+			direct)
+
 # Мы должны сначала установить координаты в data, а потом по ним создавать
 # selectBoxes.
 
-def getSelectionBoxes(selectionRangeCoord, textWidth, lineCount):
+def getSelectionBoxes(selectionRangeCoord, textWidth, lineCount, textBuffer):
 	"""
 	Берет координаты выделения и возвращает массив с прямоугольниками которые
 	надо нарисовать на экране.
@@ -19,11 +59,11 @@ def getSelectionBoxes(selectionRangeCoord, textWidth, lineCount):
 		if y1 == i == y2:
 			return pmap({"count": i, "start": x1, "end": x2})
 		elif y1 == i:
-			return pmap({"count": i, "start": x1, "end": text_width})
+			return pmap({"count": i, "start": x1, "end": textBuffer[i].length})
 		elif y2 == i:
 			return pmap({"count": i, "start": 0, "end": x2})
 		elif y1 < i < y2:
-			return pmap({"count": i, "start": 0, "end": text_width})
+			return pmap({"count": i, "start": 0, "end": textBuffer[i].length})
 		else:
 			return None
 
@@ -43,7 +83,7 @@ def selectionRender(window, props, parentProps):
 	sw = 13
 	sh = 20
 
-	for i in getSelectionBoxes(props["coords"], 50, 10):
+	for i in getSelectionBoxes(props["coords"], 50, 10, props["textBuffer"]):
 		# Проблема в этом коде:
 		x = xstart + sw * i["start"]
 		y = ystart + sh * i["count"]
