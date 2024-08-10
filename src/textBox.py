@@ -4,36 +4,31 @@ from src.selection import *
 import lib.bsgui as gui
 from var_dump import var_dump
 
-def keyRight(window, selfa, isShift, textBuffer):
-	if isShift:
-		textBuffer.addSelectionRight()
-		if selfa.selection is None:
-			selfa.selection = Selection(window, textBuffer)
-			selfa.selection.data = selfa.selection.data.set(
-				"x1", textBuffer.cursor.x)
-			selfa.selection.data = selfa.selection.data.set(
-				"y1", textBuffer.cursor.y)
-			selfa.selection.data = selfa.selection.data.set(
-				"x2", textBuffer.cursor.x)
-			selfa.selection.data = selfa.selection.data.set(
-				"y2", textBuffer.cursor.y)
-			selfa.selection.data = selfa.selection.data.set("selectBoxes",
-				SELsetCoordSelection(
-				textBuffer,
-				# Передаем координаты одного и того же символа потому что в
-				# выделении пока нет символов.
-				textBuffer.cursor.x,
-				textBuffer.cursor.y,
-				textBuffer.cursor.x,
-				textBuffer.cursor.y))
-		else:
-			selfa.selection.data = SELaddSelectionRight(
-				selfa.selection.data,
-				textBuffer,
-				textBuffer.cursor.x,
-				textBuffer.cursor.y)
-			print(selfa.selection.data["selectBoxes"])
-	textBuffer.cursor.right(textBuffer, True)
+def expandDataCoord(selectionRangeCoord, cursorCoord):
+	"""
+	Расширяет выделение до какого то символа. Возвращает новое выделение.
+	TODO: Надо сделать чтоб не только расширяло но и сжимало.
+	"""
+	sx1, sy1, sx2, sy2 = selectionRangeCoord
+	cx, cy = cursorCoord
+	if ((cx < sx1 and cy == sy1) or cy < sy1):
+		return (cx, cy, sx2, sy2)
+	elif ((cx > sx2 and cy == sy2) or cy > sy2):
+		return (sx1, sy1, cx, cy)
+	else:
+		return (sx1, sy1, sx2, sy2)
+
+def setSelectionRange(selectionRangeCoord, cursor):
+	"""
+	Принимает текущее выделение и текущую координату курсора, и возвращает
+	новые координа выделения.
+	"""
+	if selectionRangeCoord is None:
+		# -1 тут нужен чтоб создавать выделение сразу когда впервые сдвинулись
+		# вправо.
+		return (cursor.x - 1, cursor.y, cursor.x, cursor.y)
+	else:
+		return expandDataCoord(selectionRangeCoord, (cursor.x, cursor.y))
 
 
 class TextBox:
@@ -52,27 +47,36 @@ class TextBox:
 		self.selection = None
 
 	def keyPressHandler(self, params):
+		cursor = self.textBuffer.cursor
 		self.children["textArea"].eventDispatcher.emit("keyPress")
 		if params["key"] == "up":
-			self.textBuffer.cursor.up(self.textBuffer)
+			cursor.up(self.textBuffer)
 
 		elif params["key"] == "down":
-			self.textBuffer.cursor.down(self.textBuffer)
-
-		elif params["key"] == "left":
-			if self.isShiftPressed:
-				self.textBuffer.addSelectionLeft()
-			self.textBuffer.cursor.left(self.textBuffer)
-
-		elif params["key"] == "right":
-			keyRight(self.window, self, self.isShiftPressed,
+			self.selection = keyDown(self.selection, self.isShiftPressed,
 				self.textBuffer)
 
+		elif params["key"] == "left":
+			self.textBuffer.cursor.left(self.textBuffer)
+			if self.isShiftPressed:
+				self.textBuffer.addSelectionLeft()
+				self.selection = setSelectionRange(
+					self.selection,
+					self.textBuffer.cursor)
+
+		elif params["key"] == "right":
+			self.textBuffer.cursor.right(self.textBuffer, True)
+			if self.isShiftPressed:
+				self.textBuffer.addSelectionRight()
+				self.selection = setSelectionRange(
+					self.selection,
+					self.textBuffer.cursor)
+
 		elif params["key"] == "backspace":
-			if (not(self.textBuffer.cursor.x == 0 and
-				self.textBuffer.cursor.y == 0)):
+			if (not(cursor.x == 0 and
+				cursor.y == 0)):
 					self.textBuffer.delSymbol()
-					self.textBuffer.cursor.left(self.textBuffer)
+					cursor.left(self.textBuffer)
 
 		elif params["key"] == "mouseWheelUp":
 			self.textBuffer.scrollUp()
@@ -88,7 +92,7 @@ class TextBox:
 
 		elif len(params["key"]) == 1:
 			self.textBuffer.addSymbol(params["key"])
-			self.textBuffer.cursor.right(self.textBuffer, False)
+			cursor.right(self.textBuffer, False)
 
 		self.window.updateWindow()
 
@@ -101,6 +105,7 @@ class TextBox:
 			"cursor": self.textBuffer.cursor,
 		}, props)
 		if self.selection is not None:
-			self.selection.render(window, {}, props)
+			selectionRender(window,
+				{"coords": self.selection}, props)
 		# Scrollbar.render(window, self.widget["children"]["scrollbar"],
 		# 	{}, props)
