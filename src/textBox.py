@@ -31,6 +31,8 @@ class TextBox:
 					self.selection,
 					self.textBuffer.cursor,
 					"up")
+			else:
+				self.selection = None
 
 		elif params["key"] == "down":
 			self.textBuffer.cursor.down(self.textBuffer)
@@ -40,6 +42,8 @@ class TextBox:
 					self.selection,
 					self.textBuffer.cursor,
 					"down")
+			else:
+				self.selection = None
 
 		elif params["key"] == "left":
 			self.textBuffer.cursor.left(self.textBuffer)
@@ -49,6 +53,8 @@ class TextBox:
 					self.selection,
 					self.textBuffer.cursor,
 					"left")
+			else:
+				self.selection = None
 
 		elif params["key"] == "right":
 			self.textBuffer.cursor.right(self.textBuffer, True)
@@ -58,6 +64,8 @@ class TextBox:
 					self.selection,
 					self.textBuffer.cursor,
 					"right")
+			else:
+				self.selection = None
 
 		elif params["key"] == "backspace":
 			if (not(cursor.x == 0 and
