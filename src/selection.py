@@ -28,6 +28,7 @@ def expandDataCoord(selectionRangeCoord, cursorCoord, direct):
 	elif ((direct == "right" or direct == "down") and
 		(((cx == sx1 + 1) and (cy == sy1)) or (sy1 < cy <= sy2))):
 			return (cx, cy, sx2, sy2)
+	# Это тут скорее чисто на всякий случай.
 	else:
 		return (sx1, sy1, sx2, sy2)
 

@@ -102,7 +102,7 @@ class TextBuffer:
 		self.newLineArray.remove(num)
 
 	def setTextFromFile(self, path):
-		with open(path, "r") as file:
+		with open(path, "r", encoding="utf-8") as file:
 			self.buf = file.read()
 
 		# Разбираем текст на строки.
