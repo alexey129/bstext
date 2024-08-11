@@ -17,6 +17,7 @@ class TextBox:
 		self.textBuffer = textBuffer
 		self.isShiftPressed = False
 
+		# Кортеж из 4-х координат.
 		self.selection = None
 
 	def keyPressHandler(self, params):
@@ -68,10 +69,15 @@ class TextBox:
 				self.selection = None
 
 		elif params["key"] == "backspace":
-			if (not(cursor.x == 0 and
-				cursor.y == 0)):
-					self.textBuffer.delSymbol()
-					cursor.left(self.textBuffer)
+			if self.selection is None:
+				if (not(cursor.x == 0 and
+					cursor.y == 0)):
+						self.textBuffer.delSymbol()
+						cursor.left(self.textBuffer)
+			else:
+				# Удаляем то что было выделено.
+				deleteTextSelection(self.textBuffer, self.selection)
+				self.selection = None
 
 		elif params["key"] == "mouseWheelUp":
 			self.textBuffer.scrollUp()

@@ -93,3 +93,8 @@ def selectionRender(window, props, parentProps):
 		# -----------------------
 		gui.drawRectangle(window, x, y, w, h, "transparent", "#FF0000")
 
+def deleteTextSelection(textBuffer, selection):
+	x1, y1, x2, y2 = selection
+	textBuffer.deleteText(
+		textBuffer.getPosInDocument(x1, y1),
+		textBuffer.getPosInDocument(x2, y2))

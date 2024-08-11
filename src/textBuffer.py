@@ -222,6 +222,19 @@ class TextBuffer:
 		res = currentStr.offsetAbs + linePosNum
 		return res
 
+	def getPosInDocument(self, x, y):
+		"""
+		Возвращает позицию текущего символа на который указывает координата x,y.
+		"""
+		currentStr = self.viewBufferCopy[y]
+		# Номер строки относительно документа, на которой находится этот символ.
+		lineNum = currentStr.absNum
+		# Позиция в этой строке куда надо вставить символ.
+		linePosNum = x + currentStr.offsetDop
+		# Позиция относительно начала документа
+		res = currentStr.offsetAbs + linePosNum
+		return res
+
 	def scrollUp(self):
 		if self.currenUpLineCount > 0:
 			self.currenUpLineCount -= 1
@@ -238,3 +251,15 @@ class TextBuffer:
 			self.selection = Selection()
 			self.selection.start = self.selection.end = self.getCursorPosInDocument()
 		self.selection.end += 1
+
+	def deleteText(self, a, b):
+		self.buf = strlib.deleteStr(self.buf, a, b)
+
+		for count, item in enumerate(self.newLineArray):
+			if a < item < b:
+				self.newLineArray.pop(count)
+
+		currentStr = self.viewBufferCopy[self.cursor.y]
+		for count, item in enumerate(self.newLineArray):
+			if item > currentStr.offsetAbs:
+				self.newLineArray[count] -= (b - a)
