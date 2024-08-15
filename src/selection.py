@@ -72,26 +72,39 @@ def getSelectionBoxes(selectionRangeCoord, textWidth, lineCount, textBuffer):
 
 def convertCoordFromBufferToScreen(a, b, viewBufferCopy):
 	"""
-	Переводит координаты символа из буфера в экранные.
+	Переводит координаты выделения из буфера в экранные.
 	"""
 	x1 = y1 = x2 = y2 = 0
 
-	# Если символ не отображается на экране в данный момент.
-	i = viewBufferCopy[0]
-	if (i.absNum + i.offsetDop > a):
-		x1 = y1 = 0
+	# Номер символа с которого начинается экранный буфер
+	screenStart = viewBufferCopy[0].offsetAbs
 
-	i = viewBufferCopy[len(viewBufferCopy)-1]
-	if (i.absNum + i.offsetDop + i.length < b):
-			x2 = i.length
-			y2 = len(viewBufferCopy)
+	# Номер символа с которым заканчивается экранный буфер
+	screenEnd = (viewBufferCopy[len(viewBufferCopy)-1].offsetAbs +
+				viewBufferCopy[len(viewBufferCopy)-1].length)
+
+	# Если символ не отображается на экране в данный момент.
+	if a < screenStart:
+		x1 = 0
+		y1 = 0
+	if b < screenStart:
+		x1 = None
+		y1 = None
+	if a > screenEnd:
+		x2 = None
+		y2 = None
+	if b > screenEnd:
+		x2 = 0
+		y2 = 0
 
 	for count, i in enumerate(viewBufferCopy):
-		if i.absNum + i.offsetDop < a < i.absNum + i.offsetDop + i.length:
-			x1 = a - (i.absNum + i.offsetDop)
+		left = i.offsetAbs + i.offsetDop
+		right = i.offsetAbs + i.offsetDop + i.length
+		if left < a < right:
+			x1 = a - (left)
 			y1 = count
-		if i.absNum + i.offsetDop < b < i.absNum + i.offsetDop + i.length:
-			x2 = b - (i.absNum + i.offsetDop)
+		if left < b < right:
+			x2 = b - (left)
 			y2 = count
 	return (x1, y1, x2, y2)
 
