@@ -70,6 +70,30 @@ def getSelectionBoxes(selectionRangeCoord, textWidth, lineCount, textBuffer):
 
 	return pvector(filter(None, map(createBox, range(lineCount))))
 
+def convertCoordFromBufferToScreen(a, b, viewBufferCopy):
+	"""
+	Переводит координаты символа из буфера в экранные.
+	"""
+	x1 = y1 = x2 = y2 = 0
+
+	# Если символ не отображается на экране в данный момент.
+	i = viewBufferCopy[0]
+	if (i.absNum + i.offsetDop > a):
+		x1 = y1 = 0
+
+	i = viewBufferCopy[len(viewBufferCopy)-1]
+	if (i.absNum + i.offsetDop + i.length < b):
+			x2 = i.length
+			y2 = len(viewBufferCopy)
+
+	for count, i in enumerate(viewBufferCopy):
+		if i.absNum + i.offsetDop < a < i.absNum + i.offsetDop + i.length:
+			x1 = a - (i.absNum + i.offsetDop)
+			y1 = count
+		if i.absNum + i.offsetDop < b < i.absNum + i.offsetDop + i.length:
+			x2 = b - (i.absNum + i.offsetDop)
+			y2 = count
+	return (x1, y1, x2, y2)
 
 def selectionRender(window, props, parentProps):
 	# Размеры курсора.
@@ -84,7 +108,10 @@ def selectionRender(window, props, parentProps):
 	sw = 13
 	sh = 20
 
-	for i in getSelectionBoxes(props["coords"], 50, 10, props["textBuffer"]):
+	a, b = props["selection"]
+	coords1 = convertCoordFromBufferToScreen(a, b, props["textBuffer"])
+
+	for i in getSelectionBoxes(coords1, 50, 10, props["textBuffer"]):
 		# Проблема в этом коде:
 		x = xstart + sw * i["start"]
 		y = ystart + sh * i["count"]
