@@ -2,6 +2,7 @@ from src.event import *
 from src.textArea import *
 from src.selection import *
 from src.textBuffer import *
+from config.viewConfig import viewConfig
 import lib.bsgui as gui
 from var_dump import var_dump
 
@@ -130,7 +131,7 @@ class TextBox:
 						cursor.left(self.textBuffer)
 			else:
 				# Удаляем то что было выделено.
-				deleteTextSelection(self.textBuffer, self.textBuffer.selectionScreen)
+				deleteTextSelection(self.textBuffer, self.textBuffer.selection)
 				self.textBuffer.selection = None
 				self.textBuffer.selectionScreen = None
 
@@ -155,7 +156,8 @@ class TextBox:
 	def render(self, window, props, parentProps):
 		self.text = props[4]
 		gui.drawText(window, "My TextBox", 20, 20)
-		gui.drawRectangle(window, 20, 20, 800, 300, "transparent", "#FF0000")
+		gui.drawRectangle(window, 20, 20, 800, 300,
+			viewConfig["textBoxBackgroundColor"])
 		self.children["textArea"].render(window, {
 			"text": props[4],
 			"cursor": self.textBuffer.cursor,

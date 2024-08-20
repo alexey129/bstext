@@ -81,6 +81,9 @@ class Cursor:
 				self.right(buf, per)
 
 class TextBuffer:
+	"""
+	Основное хранилище текста.
+	"""
 	def __init__(self):
 		self.buf = ""
 		self.newLineArray = []
@@ -146,7 +149,8 @@ class TextBuffer:
 		i = 0
 		while i < len(self.newLineArray) - 1:
 			# Берем промежуток от одного переноса строки до другого.
-			strings.append(self.buf[self.newLineArray[i]:self.newLineArray[i+1]])
+			strings.append(
+				self.buf[self.newLineArray[i]:self.newLineArray[i+1]])
 			i += 1
 		
 		# Разбиваем строки на подстроки.
@@ -189,7 +193,8 @@ class TextBuffer:
 		i = 0
 		while i < len(self.newLineArray) - 1:
 			# Берем промежуток от одного переноса строки до другого.
-			strings.append(self.buf[self.newLineArray[i]:self.newLineArray[i+1]])
+			strings.append(
+				self.buf[self.newLineArray[i]:self.newLineArray[i+1]])
 			i += 1
 		
 		# Разбиваем строки на подстроки.
@@ -343,7 +348,7 @@ class TextBuffer:
 		"""
 		Принимает координаты выделения на экране, и переводит их в координаты
 		в буфере.
-		"""
+		""" 
 		sx1, sy1, sx2, sy2 = selectionScreen
 		self.selection = (self.getPosInDocument(sx1, sy1),
 						  self.getPosInDocument(sx2, sy2))

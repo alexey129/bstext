@@ -15,8 +15,8 @@ class TextArea:
 		pass
 
 	def render(self, window, props, parentProps):
-		gui.drawText(window, "My TextArea", 20, 20)
-		gui.drawRectangle(window, 20, 20, 800, 300, "transparent", "#FF0000")
+		#gui.drawText(window, "My TextArea", 20, 20)
+		#gui.drawRectangle(window, 20, 20, 800, 300, "transparent", "#FF0000")
 		self.children["cursor"].render(window, {
 			"cursor": props["cursor"],
 		}, props)

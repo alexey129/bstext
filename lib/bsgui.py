@@ -1,6 +1,7 @@
 import wx
 
 from src.event import *
+from config.viewConfig import viewConfig
 
 def hex_to_rgb(hex_color):
 	"""
@@ -20,8 +21,10 @@ def hex_to_rgb(hex_color):
 
 def drawText(window, text, x, y):
 	font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
-		wx.FONTWEIGHT_NORMAL, faceName="courier new")
+		wx.FONTWEIGHT_NORMAL, faceName="hack")
 	window.canvas.SetFont(font)
+	r, g, b = hex_to_rgb(viewConfig["textBoxFontColor"])
+	window.canvas.SetTextForeground(wx.Colour(r, g, b))
 	window.canvas.DrawText(text, x, y)
 
 def setBrush(dc, r, g, b, fill = None):
@@ -54,7 +57,7 @@ def setFillAndBorder(dc, fill, border):
 		r, g, b = hex_to_rgb(border)
 		setPen(dc, r, g, b)
 
-def drawRectangle(window, x, y, width, height, fill, border):
+def drawRectangle(window, x, y, width, height, fill, border = None):
 	canvas = window.canvas
 	setFillAndBorder(canvas, fill, border)
 	canvas.DrawRectangle(x, y, width, height)
