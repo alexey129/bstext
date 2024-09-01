@@ -19,11 +19,14 @@ def hex_to_rgb(hex_color):
 	
 	return (r, g, b)
 
-def drawText(window, text, x, y):
+def drawText(window, text, x, y, color = None):
 	font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
 		wx.FONTWEIGHT_NORMAL, faceName="hack")
 	window.canvas.SetFont(font)
-	r, g, b = hex_to_rgb(viewConfig["textBoxFontColor"])
+	if color is None:
+		r, g, b = hex_to_rgb(viewConfig["textBoxFontColor"])
+	else:
+		r, g, b = hex_to_rgb(color)
 	window.canvas.SetTextForeground(wx.Colour(r, g, b))
 	window.canvas.DrawText(text, x, y)
 

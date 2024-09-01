@@ -2,6 +2,7 @@ from src.event import *
 from src.textArea import *
 from src.selection import *
 from src.textBuffer import *
+import src.textNumber as TextNumber
 from config.viewConfig import viewConfig
 import lib.bsgui as gui
 from var_dump import var_dump
@@ -92,8 +93,6 @@ class TextBox:
 		self.eventDispatcher = EventDispatcher()
 		self.eventDispatcher.setHandler("keyPress", self.keyPressHandler)
 		self.children = {"textArea": TextArea(window)}
-		self.text = {} # Массив со строками которые остается просто нарисовать
-					   # на экране
 		self.textBuffer = textBuffer
 		self.isShiftPressed = False
 
@@ -154,11 +153,14 @@ class TextBox:
 		self.window.updateWindow()
 
 	def render(self, window, props, parentProps):
-		self.text = props[4]
 		gui.drawText(window, "My TextBox", 20, 20)
 		gui.drawRectangle(window, 20, 20, 800, 300,
 			viewConfig["textBoxBackgroundColor"])
 		self.children["textArea"].render(window, {
+			"text": props[4],
+			"cursor": self.textBuffer.cursor,
+		}, props)
+		TextNumber.render(window, {
 			"text": props[4],
 			"cursor": self.textBuffer.cursor,
 		}, props)

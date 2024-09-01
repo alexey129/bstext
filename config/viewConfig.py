@@ -15,4 +15,6 @@ viewConfig = pmap({
 	"textBoxSelectionBackgroudColor": "#111111",
 	# Цвет рамки выделения.
 	"textBoxSelectionBorderColor": "#666666",
+	# Цвет цифр у номеров строк.
+	"textBoxLineNumberColor": "#222222",
 })
