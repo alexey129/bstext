@@ -14,6 +14,7 @@ class TextEditor:
 		self.children = {"textBox": TextBox(window, self.textBuffer)}
 
 	def keyPressHandler(self, params):
+		params["textBox"] = self.children["textBox"]
 		self.children["textBox"].eventDispatcher.emit("keyPress", params)
 	# Эта функция должна изменять дерево виджетов. То есть вставлять созданные
 	# виджеты в массив children. Нет, уже не должна.

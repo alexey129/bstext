@@ -62,7 +62,7 @@ def getBracketText(string, index):
 	"""
 	Ищет соответсвующую скобку в строке и возвращает текст внутри скобок.
 	"""
-	if string[index] in ("(", "[", "{", ):
+	if string[index] in ("(", "[", "{"):
 		i = findCorrespBracket(string, index)
 		return string[index+1:i]
 	else:
