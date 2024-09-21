@@ -1,3 +1,5 @@
+from lib.bslib.func import *
+
 class EventDispatcher:
 	def __init__(self):
 		self.events = {}
@@ -11,3 +13,16 @@ class EventDispatcher:
 			func()
 		else:
 			func(params)
+
+def createEventDispatcher():
+	return ()
+
+def setHandler(disp, name, func):
+	return disp + ((name, func),)
+
+def emit(disp, name, params = None):
+	func = getValTup(disp, name)
+	if params is None:
+		return func()
+	else:
+		return func(params)

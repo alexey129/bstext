@@ -83,7 +83,7 @@ def clearWindow(window):
 	window.canvas.DrawRectangle(0, 0, w, h)
 
 def createdWindow():
-	print("window is created")
+	pass
 
 class Window:
 	def __init__(self, title, width, height):

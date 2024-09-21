@@ -1,15 +1,11 @@
 import wx
 
 from src.textBuffer import *
-from src.textEditor import *
-from src.event import *
+import src.textEditor as TEdit
+import src.event as event
 import lib.bsgui as gui
-
-# Сплошной набор символов.
-
-
-
-
+from lib.bslib.func import *
+from lib.bslib.log import *
 
 # Отдельно дерево виджетов-объектов и отдельно функция которая принимает
 # любой виджет(он уже полностью готовый и измененный как надо), рисует белый
@@ -17,91 +13,71 @@ import lib.bsgui as gui
 # функцию для перерисовки.
 def main():
 	window = gui.Window("BSText", 1200, 600)
-	textEditor = TextEditor(window)
-	def keyPressHandler(params):
-		textEditor.eventDispatcher.emit("keyPress", params)
+	textEditor = TEdit.createTextEditor(window, "myEditor", 0, 0, 1000, 500)
 
-	eventDispatcher = EventDispatcher()
-	eventDispatcher.setHandler("keyPress", keyPressHandler)
+	def keyPressHandler(key):
+		nonlocal textEditor
+		nonlocal window
+		textEditor = textEditor.onKeyPress(textEditor, key)
+		gui.updateWindow(window)
 
-	def aaa1(event):
+	def renderEventHandler(event1):
+		nonlocal textEditor
+		nonlocal window
 		window.canvas = wx.PaintDC(window.frame)
 		gui.clearWindow(window)
-		textEditor.render(window, {
-			"x": 0,
-			"y": 0,
-			"width": 1000,
-			"height": 500,
-		}, {})
+		TEdit.render(textEditor)
 
-	def aaa2(event):
-		symbol = chr(event.GetUnicodeKey())
+	def symbolPressHandler(event1):
+		symbol = chr(event1.GetUnicodeKey())
 		if symbol != None:
-			eventDispatcher.emit("keyPress", {"key": symbol})
+			keyPressHandler(symbol)
 		else:
 			# Обработка других нажатий клавиш
-			event.Skip()
+			event1.Skip()
 
-	def aaa3(event):
-		keyCode = event.GetKeyCode()
+	def nonCharPressHandler(event1):
+		keyCode = event1.GetKeyCode()
 		if keyCode == wx.WXK_UP:
-			eventDispatcher.emit("keyPress", {
-				"key":"up",
-			})
+			keyPressHandler("up")
 		elif keyCode == wx.WXK_DOWN:
-			eventDispatcher.emit("keyPress", {
-				"key":"down",
-			})
+			keyPressHandler("down")
 		elif keyCode == wx.WXK_LEFT:
-			eventDispatcher.emit("keyPress", {
-				"key":"left",
-			})
+			keyPressHandler("left")
 		elif keyCode == wx.WXK_RIGHT:
-			eventDispatcher.emit("keyPress", {
-				"key":"right",
-			})
+			keyPressHandler("right")
 		elif keyCode == wx.WXK_BACK:
-			eventDispatcher.emit("keyPress", {
-				"key":"backspace",
-			})
+			keyPressHandler("backspace")
 		elif keyCode == wx.WXK_SHIFT:
-			eventDispatcher.emit("keyPress", {
-				"key":"shift",
-			})
+			keyPressHandler("shift")
 		else:
 			# Обработка других нажатий клавиш
-			event.Skip()
+			event1.Skip()
 
-	def aaa4(event):
-		rotation = event.GetWheelRotation()
+	def mouseWheelEventHandler(event1):
+		rotation = event1.GetWheelRotation()
 	
 		if rotation > 0:
-			eventDispatcher.emit("keyPress", {
-				"key":"mouseWheelUp",
-			})
+			keyPressHandler("mouseWheelUp")
 		else:
-			eventDispatcher.emit("keyPress", {
-				"key":"mouseWheelDown",
-			})
+			keyPressHandler("mouseWheelDown")
 
-	def aaa5(event):
-		keyCode = event.GetKeyCode()
+	def keyRealizeHandler(event1):
+		keyCode = event1.GetKeyCode()
 		if keyCode == wx.WXK_SHIFT:
-			eventDispatcher.emit("keyPress", {
-				"key":"shiftRealize",
-			})
+			keyPressHandler("shiftRealize")
 		else:
 			# Обработка других нажатий клавиш
-			event.Skip()
+			event1.Skip()
 
-	gui.setRenderEventHandler(window, aaa1)
+	gui.setRenderEventHandler(window, renderEventHandler)
 
-	gui.setCharKeyEventHandler(window, aaa2)
+	gui.setCharKeyEventHandler(window, symbolPressHandler)
 
-	gui.setKeyDownEventHandler(window, aaa3)
+	gui.setKeyDownEventHandler(window, nonCharPressHandler)
 
-	gui.setMouseWheelEventHandler(window, aaa4)
+	gui.setMouseWheelEventHandler(window, mouseWheelEventHandler)
 
-	gui.setKeyUpEventHandler(window, aaa5)
+	gui.setKeyUpEventHandler(window, keyRealizeHandler)
 
 	gui.runWindow(window)

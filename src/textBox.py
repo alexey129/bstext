@@ -1,11 +1,14 @@
-from src.event import *
-from src.textArea import *
+import src.event as event
+import src.textArea as tArea
 from src.selection import *
 from src.textBuffer import *
 import src.textNumber as TextNumber
 from config.viewConfig import viewConfig
 import lib.bsgui as gui
 from var_dump import var_dump
+from collections import namedtuple
+from lib.bslib.log import *
+import src.widget as W
 
 def getLeftSideStr(string, index):
 	"""
@@ -85,89 +88,127 @@ def whereAndHowMuch(key, cursor, screenLines, lineAbove, lineUnder):
 					cursor.y, screenLines, lineAbove, lineUnder), cursor.x))
 	return (where, howMuch)
 
-def keyPressHandler(params):
-	textbox = params["textBox"]
-	cursor = textbox.textBuffer.cursor
-	textbox.children["textArea"].eventDispatcher.emit("keyPress")
+def keyPressHandler(textbox, key):
+	textBuffer = textbox.textBuffer
+	#textbox = params["textBox"] #getValTup(params, "")
+	cursor = textBuffer.cursor
+	#textbox.children["textArea"].eventDispatcher.emit("keyPress")
 
-	if (params["key"] == "up" or
-	params["key"] == "down" or
-	params["key"] == "left" or
-	params["key"] == "right"):
+	if key in ("up", "down", "left", "right"):
 		if textbox.isShiftPressed:
 			aaa = whereAndHowMuch(
-				params["key"],
+				key,
 				cursor,
-				textbox.textBuffer.viewBufferCopy,
-				textbox.textBuffer.lineAboveScreen,
-				textbox.textBuffer.lineUnderScreen,
+				textBuffer.viewBufferCopy,
+				textBuffer.lineAboveScreen,
+				textBuffer.lineUnderScreen,
 				)
 			if aaa[0] in ("left", "up"):
 				aaa = ("left", aaa[1])
 			elif aaa[0] in ("right", "down"):
 				aaa = ("right", aaa[1])
-			textbox.textBuffer.changeSelection(aaa)
+			textBuffer.changeSelection(aaa)
 		else:
-			textbox.textBuffer.selection = None
-			textbox.textBuffer.selectionScreen = None
-		textbox.textBuffer.cursor.toDirect(params["key"], textbox.textBuffer)
+			textBuffer.selection = None
+			textBuffer.selectionScreen = None
+		textBuffer.cursor.toDirect(
+			key, textBuffer)
 
-	elif params["key"] == "backspace":
-		if textbox.textBuffer.selection is None:
+	elif key == "backspace":
+		if textBuffer.selection is None:
 			if (not(cursor.x == 0 and
 				cursor.y == 0)):
-					textbox.textBuffer.delSymbol()
-					cursor.left(textbox.textBuffer)
+					textBuffer.delSymbol()
+					cursor.left(textBuffer)
 		else:
 			# Удаляем то что было выделено.
-			deleteTextSelection(textbox.textBuffer, textbox.textBuffer.selection)
-			textbox.textBuffer.selection = None
-			textbox.textBuffer.selectionScreen = None
+			deleteTextSelection(
+				textBuffer, textBuffer.selection)
+			textBuffer.selection = None
+			textBuffer.selectionScreen = None
 
-	elif params["key"] == "mouseWheelUp":
-		textbox.textBuffer.scrollUp()
+	elif key == "mouseWheelUp":
+		textBuffer.scrollUp()
 
-	elif params["key"] == "mouseWheelDown":
-		textbox.textBuffer.scrollDown()
+	elif key == "mouseWheelDown":
+		textBuffer.scrollDown()
 
-	elif params["key"] == "shift":
-		textbox.isShiftPressed = True
+	elif key == "shift":
+		textbox = textbox._replace(isShiftPressed = True)
 
-	elif params["key"] == "shiftRealize":
-		textbox.isShiftPressed = False
+	elif key == "shiftRealize":
+		textbox = textbox._replace(isShiftPressed = False)
 
-	elif len(params["key"]) == 1:
-		textbox.textBuffer.addSymbol(params["key"])
-		cursor.right(textbox.textBuffer, False)
+	elif len(key) == 1:
+		textBuffer.addSymbol(key)
+		cursor.right(textBuffer, False)
 
-	textbox.window.updateWindow()
+	textbox = setTextBuffer(textbox, textBuffer)
 
-class TextBox:
-	def __init__(self, window, textBuffer):
-		self.window = window
-		self.className = "TextBox"
-		self.name = "bsText"
-		self.eventDispatcher = EventDispatcher()
-		self.eventDispatcher.setHandler("keyPress", keyPressHandler)
-		self.children = {"textArea": TextArea(window)}
-		self.textBuffer = textBuffer
-		self.isShiftPressed = False
+	ta = W.getChild(textbox, "textArea")
+	ta = tArea.setCursor(ta, cursor)
+	textbox = W.setChild(textbox, "textArea", ta)
 
-	def render(self, window, props, parentProps):
-		gui.drawText(window, "My TextBox", 20, 20)
-		gui.drawRectangle(window, 20, 20, 800, 300,
-			viewConfig["textBoxBackgroundColor"])
-		self.children["textArea"].render(window, {
-			"text": props[4],
-			"cursor": self.textBuffer.cursor,
-		}, props)
-		TextNumber.render(window, {
-			"text": props[4],
-			"cursor": self.textBuffer.cursor,
-		}, props)
-		if self.textBuffer.selection is not None:
-			selectionRender(window,
-				{"coords": self.textBuffer.selectionScreen,
-				"textBuffer": self.textBuffer.viewBufferCopy,
-				"cursor": self.textBuffer.cursor,
-				"selection": self.textBuffer.selection}, props)
+	textbox = W.keyPressChildren(textbox, key)
+	return textbox
+	#textbox.window.updateWindow()
+
+def render(textBox):
+	gui.drawRectangle(
+		textBox.window,
+		textBox.x,
+		textBox.y,
+		textBox.width,
+		textBox.height,
+		viewConfig["textBoxBackgroundColor"])
+
+	if textBox.textBuffer.selection is not None:
+		selectionRender(
+			textBox.window,
+			textBox.textBuffer.selectionScreen,
+			textBox.textBuffer.viewBufferCopy,
+			textBox.textBuffer.cursor,
+			textBox.textBuffer.selection)
+	W.drawChildren(textBox)
+
+def setTextBuffer(textBox, textBuffer):
+	textBox = textBox._replace(textBuffer = textBuffer)
+	vbc = textBuffer.getViewText()
+	ta = getValTup(textBox.children, "textArea")
+	ta = tArea.setTextBuffer(ta, vbc)
+	tn = getValTup(textBox.children, "textNumber")
+	tn = TextNumber.setTextBuffer(tn, vbc)
+	textBox = textBox._replace(children = (("textArea",ta), ("textNumber",tn)) )
+	return textBox
+
+TextBox = W.newWidget("TextBox", (
+	"textBuffer",
+	"isShiftPressed",
+))
+
+def createTextBox(parent, name, x, y, width, height):
+	"""
+	Добавляет новый виджет к родителю.
+	"""
+	textBox = TextBox(
+		onPaint = render,
+		onKeyPress = keyPressHandler,
+		x = x,
+		y = y,
+		width = width,
+		height = height,
+		isShiftPressed = False,
+		children = (),
+		window = parent.window,
+		textBuffer = None
+	)
+
+	ta = tArea.createTextArea(textBox, "textArea", 20, 0, 800, 400)
+	#ta = tArea.setTextBuffer(ta, textBox.textBuffer)
+	tn = TextNumber.createTextNumber(textBox, "textNumber", 0, 0, 20, 400)
+	#tn = TextNumber.setTextBuffer(tn, textBox.textBuffer)
+
+	textBox = W.addChild(textBox, "textArea", ta)
+	textBox = W.addChild(textBox, "textNumber", tn)
+
+	return textBox

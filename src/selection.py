@@ -108,7 +108,7 @@ def convertCoordFromBufferToScreen(a, b, viewBufferCopy):
 			y2 = count
 	return (x1, y1, x2, y2)
 
-def selectionRender(window, props, parentProps):
+def selectionRender(window, sels, vbc, cur, sel):
 	# Размеры курсора.
 	w = 2
 	h = 20
@@ -121,10 +121,10 @@ def selectionRender(window, props, parentProps):
 	sw = 13
 	sh = 20
 
-	a, b = props["selection"]
-	coords1 = convertCoordFromBufferToScreen(a, b, props["textBuffer"])
+	a, b = sel
+	coords1 = convertCoordFromBufferToScreen(a, b, vbc)
 
-	for i in getSelectionBoxes(coords1, 50, 10, props["textBuffer"]):
+	for i in getSelectionBoxes(coords1, 50, 10, vbc):
 		# Проблема в этом коде:
 		x = xstart + sw * i["start"]
 		y = ystart + sh * i["count"]
