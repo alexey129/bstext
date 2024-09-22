@@ -153,9 +153,9 @@ def keyPressHandler(textbox, key):
 	return textbox
 	#textbox.window.updateWindow()
 
-def render(textBox):
+def render(textBox, canvas):
 	gui.drawRectangle(
-		textBox.window,
+		canvas,
 		textBox.x,
 		textBox.y,
 		textBox.width,
@@ -164,12 +164,12 @@ def render(textBox):
 
 	if textBox.textBuffer.selection is not None:
 		selectionRender(
-			textBox.window,
+			canvas,
 			textBox.textBuffer.selectionScreen,
 			textBox.textBuffer.viewBufferCopy,
 			textBox.textBuffer.cursor,
 			textBox.textBuffer.selection)
-	W.drawChildren(textBox)
+	W.drawChildren(textBox, canvas)
 
 def setTextBuffer(textBox, textBuffer):
 	textBox = textBox._replace(textBuffer = textBuffer)
@@ -199,7 +199,6 @@ def createTextBox(parent, name, x, y, width, height):
 		height = height,
 		isShiftPressed = False,
 		children = (),
-		window = parent.window,
 		textBuffer = None
 	)
 

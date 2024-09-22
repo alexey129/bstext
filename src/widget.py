@@ -15,7 +15,6 @@ def AbstractWidget():
 		"width",
 		"height",
 		"children",
-		"window",
 	])
 
 def newWidget(name, tpl):
@@ -30,12 +29,12 @@ def iterChildrenWidget(widget):
 	"""
 	return itemsTuple(widget.children)
 
-def drawChildren(widget):
+def drawChildren(widget, canvas):
 	"""
 	Рисует всех детей виджета, то есть вызывает у всех детей функцию onPaint.
 	"""
 	for key, value in iterChildrenWidget(widget):
-		value.onPaint(value)
+		value.onPaint(value, canvas)
 
 def keyPressChildren(widget, key):
 	"""

@@ -19,16 +19,16 @@ def hex_to_rgb(hex_color):
 	
 	return (r, g, b)
 
-def drawText(window, text, x, y, color = None):
+def drawText(canvas, text, x, y, color = None):
 	font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
 		wx.FONTWEIGHT_NORMAL, faceName="hack")
-	window.canvas.SetFont(font)
+	canvas.SetFont(font)
 	if color is None:
 		r, g, b = hex_to_rgb(viewConfig["textBoxFontColor"])
 	else:
 		r, g, b = hex_to_rgb(color)
-	window.canvas.SetTextForeground(wx.Colour(r, g, b))
-	window.canvas.DrawText(text, x, y)
+	canvas.SetTextForeground(wx.Colour(r, g, b))
+	canvas.DrawText(text, x, y)
 
 def setBrush(dc, r, g, b, fill = None):
 	if fill == "solid" or fill == None:
@@ -60,8 +60,7 @@ def setFillAndBorder(dc, fill, border):
 		r, g, b = hex_to_rgb(border)
 		setPen(dc, r, g, b)
 
-def drawRectangle(window, x, y, width, height, fill, border = None):
-	canvas = window.canvas
+def drawRectangle(canvas, x, y, width, height, fill, border = None):
 	setFillAndBorder(canvas, fill, border)
 	canvas.DrawRectangle(x, y, width, height)
 
@@ -76,29 +75,27 @@ def drawEllipse(window, x, y, width, height, fill, border):
 	setFillAndBorder(canvas, fill, border)
 	canvas.DrawEllipse(x, y, width, height)
 
-def clearWindow(window):
-	window.canvas.SetPen(wx.TRANSPARENT_PEN)
-	window.canvas.SetBrush(wx.WHITE_BRUSH)
+def clearWindow(window, canvas):
+	canvas.SetPen(wx.TRANSPARENT_PEN)
+	canvas.SetBrush(wx.WHITE_BRUSH)
 	w, h = window.frame.GetClientSize()
-	window.canvas.DrawRectangle(0, 0, w, h)
+	canvas.DrawRectangle(0, 0, w, h)
 
-def createdWindow():
-	pass
+Window = namedtuple("Window", (
+	"app",
+	"frame",
+	"width",
+	"height",
+	"run",
+	"rootWidget",
+))
 
-class Window:
-	def __init__(self, title, width, height):
-		self.app = wx.App()
-		self.frame = wx.Frame(parent=None, title=title, size=(width, height))
-		self.canvas = None
-		self.width = width
-		self.height = height
-		self.eventDispatcher = EventDispatcher()
-		self.eventDispatcher.setHandler("createWindow", createdWindow)
-		self.eventDispatcher.emit("createWindow")
-
-	def updateWindow(self):
-		self.frame.Refresh()
-		self.frame.Update()
+# class Window:
+# 	def __init__(self, title, width, height):
+# 		self.app = wx.App()
+# 		self.frame = wx.Frame(parent=None, title=title, size=(width, height))
+# 		self.width = width
+# 		self.height = height
 
 def setRenderEventHandler(window, func):
 	window.frame.Bind(wx.EVT_PAINT, func)
@@ -124,3 +121,89 @@ def runWindow(window):
 def updateWindow(window):
 	window.frame.Refresh()
 	window.frame.Update()
+
+def createApp():
+	newApp = Window(
+		app = wx.App(),
+		frame = wx.Frame(parent=None, title="BSText", size=(1000, 500)),
+		width = 1000,
+		height = 500,
+		run = runFunc,
+		rootWidget = None,
+	)
+	return newApp
+
+# Отдельно дерево виджетов-объектов и отдельно функция которая принимает
+# любой виджет(он уже полностью готовый и измененный как надо), рисует белый
+# прямоугольник и вызывает у него и у всех его детей из массива children
+# функцию для перерисовки.
+def runFunc(window):
+	rootWidget = window.rootWidget
+
+	def keyPressHandler(key):
+		nonlocal rootWidget
+		nonlocal window
+		rootWidget = rootWidget.onKeyPress(rootWidget, key)
+		updateWindow(window)
+
+	def renderEventHandler(event1):
+		nonlocal rootWidget
+		nonlocal window
+		# window.canvas = wx.PaintDC(window.frame)
+		canvas = wx.PaintDC(window.frame)
+		clearWindow(window, canvas)
+		rootWidget.onPaint(rootWidget, canvas)
+
+	def symbolPressHandler(event1):
+		symbol = chr(event1.GetUnicodeKey())
+		if symbol != None:
+			keyPressHandler(symbol)
+		else:
+			# Обработка других нажатий клавиш
+			event1.Skip()
+
+	def nonCharPressHandler(event1):
+		keyCode = event1.GetKeyCode()
+		if keyCode == wx.WXK_UP:
+			keyPressHandler("up")
+		elif keyCode == wx.WXK_DOWN:
+			keyPressHandler("down")
+		elif keyCode == wx.WXK_LEFT:
+			keyPressHandler("left")
+		elif keyCode == wx.WXK_RIGHT:
+			keyPressHandler("right")
+		elif keyCode == wx.WXK_BACK:
+			keyPressHandler("backspace")
+		elif keyCode == wx.WXK_SHIFT:
+			keyPressHandler("shift")
+		else:
+			# Обработка других нажатий клавиш
+			event1.Skip()
+
+	def mouseWheelEventHandler(event1):
+		rotation = event1.GetWheelRotation()
+	
+		if rotation > 0:
+			keyPressHandler("mouseWheelUp")
+		else:
+			keyPressHandler("mouseWheelDown")
+
+	def keyRealizeHandler(event1):
+		keyCode = event1.GetKeyCode()
+		if keyCode == wx.WXK_SHIFT:
+			keyPressHandler("shiftRealize")
+		else:
+			# Обработка других нажатий клавиш
+			event1.Skip()
+
+	setRenderEventHandler(window, renderEventHandler)
+
+	setCharKeyEventHandler(window, symbolPressHandler)
+
+	setKeyDownEventHandler(window, nonCharPressHandler)
+
+	setMouseWheelEventHandler(window, mouseWheelEventHandler)
+
+	setKeyUpEventHandler(window, keyRealizeHandler)
+
+	runWindow(window)

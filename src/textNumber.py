@@ -10,7 +10,7 @@ def setTextBuffer(textNumber, textBuffer):
 def keyPressHandler(textNumber, key):
 	return textNumber
 
-def drawTextBuffer(window, textBuffer):
+def drawTextBuffer(canvas, textBuffer):
 	if textBuffer is None:
 		raise Exception("TextBuffer равен None")
 
@@ -18,16 +18,16 @@ def drawTextBuffer(window, textBuffer):
 	num = None
 	for i in textBuffer:
 		if num != i.absNum:
-			gui.drawText(window, str(i.absNum), 5, count,
+			gui.drawText(canvas, str(i.absNum), 5, count,
 				viewConfig["textBoxLineNumberColor"])
 			num = i.absNum
 		count += 20
 
-def render(textNumber):
+def render(textNumber, canvas):
 	#gui.drawText(window, "My TextArea", 20, 20)
 	#gui.drawRectangle(window, 20, 20, 800, 300, "transparent", "#FF0000")
-	drawTextBuffer(textNumber.window, textNumber.textBuffer)
-	W.drawChildren(textNumber)
+	drawTextBuffer(canvas, textNumber.textBuffer)
+	W.drawChildren(textNumber, canvas)
 
 TextNumber = W.newWidget("TextNumber", (
 	"textBuffer",
@@ -46,7 +46,6 @@ def createTextNumber(parent, name, x, y, width, height):
 		height = height,
 		textBuffer = None,
 		children = (),
-		window = parent.window,
 	)
 
 	return textNumber

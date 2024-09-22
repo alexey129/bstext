@@ -18,17 +18,17 @@ def keyPressHandler(textEditor, key):
 	# params["textBox"] = self.children["textBox"]
 	# self.children["textBox"].eventDispatcher.emit("keyPress", params)
 
-def render(textEditor):
+def render(textEditor, canvas):
 	gui.drawRectangle(
-		textEditor.window,
+		canvas,
 		textEditor.x,
 		textEditor.y,
 		textEditor.width,
 		textEditor.height,
 		"transparent", "#FF0000")
-	W.drawChildren(textEditor)
+	W.drawChildren(textEditor, canvas)
 
-def createTextEditor(window, name, x, y, width, height):
+def createTextEditor(name, x, y, width, height):
 	"""
 	Добавляет новый виджет к родителю.
 	"""
@@ -40,7 +40,6 @@ def createTextEditor(window, name, x, y, width, height):
 		width = width,
 		height = height,
 		children = (),
-		window = window,
 		textBuffer = TextBuffer(),
 	)
 

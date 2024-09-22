@@ -8,7 +8,7 @@ import src.widget as W
 def keyPressHandler(cursor, key):
 	return cursor
 
-def render(cursor):
+def render(cursor, canvas):
 	# Размеры курсора.
 	w = 2
 	h = 20
@@ -25,9 +25,9 @@ def render(cursor):
 	# Верхний левый угол курсора.
 	xc = xstart + curs.x*sw
 	yc = ystart + curs.y*sh
-	gui.drawRectangle(cursor.window, xc, yc, w, h, "transparent", "#FF0000")
+	gui.drawRectangle(canvas, xc, yc, w, h, "transparent", "#FF0000")
 	
-	W.drawChildren(cursor)
+	W.drawChildren(cursor, canvas)
 
 Cursor = W.newWidget("Cursor", ())
 
@@ -43,6 +43,5 @@ def createCursor(parent, name, x, y, width, height):
 		width = width,
 		height = height,
 		children = (),
-		window = parent.window,
 	)
 	return cursor

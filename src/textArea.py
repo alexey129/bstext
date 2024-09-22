@@ -19,22 +19,17 @@ def keyPressHandler(textArea, key):
 	textArea = W.setChild(textArea, "cursor", cur)
 	return textArea
 
-def drawTextBuffer(window, textBuffer):
+def drawTextBuffer(canvas, textBuffer):
 	if textBuffer is None:
 		raise Exception("TextBuffer равен None")
 	count = 50
 	for i in textBuffer:
-		gui.drawText(window, i.text, 20, count)
+		gui.drawText(canvas, i.text, 20, count)
 		count += 20
 
-def render(textArea):
-	drawTextBuffer(textArea.window, textArea.textBuffer)
-	#gui.drawText(window, "My TextArea", 20, 20)
-	#gui.drawRectangle(window, 20, 20, 800, 300, "transparent", "#FF0000")
-	W.drawChildren(textArea)
-	# self.children["cursor"].render(window, {
-	# 	"cursor": props["cursor"],
-	# }, props)
+def render(textArea, canvas):
+	drawTextBuffer(canvas, textArea.textBuffer)
+	W.drawChildren(textArea, canvas)
 
 TextArea = W.newWidget("TextArea", (
 	"textBuffer",
@@ -54,7 +49,6 @@ def createTextArea(parent, name, x, y, width, height):
 		height = height,
 		textBuffer = None,
 		children = (),
-		window = parent.window,
 		cursor = None
 	)
 
