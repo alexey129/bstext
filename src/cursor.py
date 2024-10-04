@@ -1,12 +1,15 @@
-import src.event as event
-import lib.bsgui as gui
 from collections import namedtuple
-from lib.bslib.func import *
+
 from var_dump import var_dump
+
+import lib.bsgui as gui
+import src.event as event
 import src.widget as W
+from lib.bslib.func import *
+
 
 def keyPressHandler(cursor, key):
-	return cursor
+	return cursor, ()
 
 def render(cursor, canvas):
 	# Размеры курсора.

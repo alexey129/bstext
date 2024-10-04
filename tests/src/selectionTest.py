@@ -1,5 +1,7 @@
-from src.selection import *
 from var_dump import var_dump
+
+from src.selection import *
+
 
 def setDataCoordTest():
 	coord = pmap({"x1": 0, "y1": 0, "x2": 0, "y2": 0})

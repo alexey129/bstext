@@ -40,10 +40,13 @@ def keyPressChildren(widget, key):
 	"""
 	Нажимает клавишу у всех детей.
 	"""
+	upEvents = ()
 	for name, child in iterChildrenWidget(widget):
-		chandgedChild = child.onKeyPress(child, key)
+		chandgedChild, upEv = child.onKeyPress(child, key)
+		#print(child, upEv)
+		upEvents = upEvents + upEv
 		widget = setChild(widget, name, chandgedChild)
-	return widget
+	return widget, upEvents
 
 def addChild(widget, name, child):
 	return widget._replace(children = widget.children + ((name, child),))

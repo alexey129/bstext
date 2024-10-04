@@ -1,8 +1,9 @@
-from src.textBox import *
 from var_dump import var_dump
 
-from src.textBuffer import *
 from src.selection import *
+from src.textBox import *
+from src.textBuffer import *
+
 
 def updateSelectionCoordTest():
 	tb = TextBuffer()

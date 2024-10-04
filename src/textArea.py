@@ -1,11 +1,13 @@
-import src.event as event
-import lib.bsgui as gui
-from var_dump import var_dump
 from collections import namedtuple
-from lib.bslib.func import *
-import src.widget as W
 
+from var_dump import var_dump
+
+import lib.bsgui as gui
 import src.cursor as cur
+import src.event as event
+import src.widget as W
+from lib.bslib.func import *
+
 
 def setTextBuffer(textArea, textBuffer):
 	return textArea._replace(textBuffer = textBuffer)
@@ -17,7 +19,7 @@ def keyPressHandler(textArea, key):
 	cur = W.getChild(textArea, "cursor")
 	cur = cur._replace(x = textArea.cursor.x, y = textArea.cursor.y)
 	textArea = W.setChild(textArea, "cursor", cur)
-	return textArea
+	return textArea, ()
 
 def drawTextBuffer(canvas, textBuffer):
 	if textBuffer is None:

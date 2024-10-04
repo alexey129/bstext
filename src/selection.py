@@ -1,9 +1,5 @@
-import copy
-import numbers
-from pyrsistent import pvector, pmap
-
+from pyrsistent import pmap, pvector
 import lib.bsgui as gui
-from src.event import *
 
 def expandDataCoord(selectionRangeCoord, cursorCoord, direct):
 	"""

@@ -1,5 +1,7 @@
 from collections import namedtuple
+
 import lib.bslib.string as strlib
+
 
 def isNamedtuple(instance):
     return isinstance(instance, tuple) and hasattr(instance, '_fields')

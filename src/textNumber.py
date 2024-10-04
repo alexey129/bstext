@@ -1,14 +1,15 @@
 import lib.bsgui as gui
 import src.event as event
+import src.widget as W
 from config.viewConfig import viewConfig
 from lib.bslib.func import *
-import src.widget as W
+
 
 def setTextBuffer(textNumber, textBuffer):
 	return textNumber._replace(textBuffer = textBuffer)
 
 def keyPressHandler(textNumber, key):
-	return textNumber
+	return textNumber, ()
 
 def drawTextBuffer(canvas, textBuffer):
 	if textBuffer is None:
@@ -18,8 +19,8 @@ def drawTextBuffer(canvas, textBuffer):
 	num = None
 	for i in textBuffer:
 		if num != i.absNum:
-			gui.drawText(canvas, str(i.absNum), 5, count,
-				viewConfig["textBoxLineNumberColor"])
+			gui.drawText(canvas, str(i.absNum + 1), 5, count,
+				getValTup(viewConfig, "textBoxLineNumberColor"))
 			num = i.absNum
 		count += 20
 

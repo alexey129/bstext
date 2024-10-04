@@ -1,19 +1,17 @@
-from collections import namedtuple
-from var_dump import var_dump
-import src.event as event
-import src.textBox as tBox
-from src.textBuffer import *
 import lib.bsgui as gui
-from lib.bslib.func import *
-from lib.bslib.log import *
+import src.textBox as tBox
+import src.menu as Mn
 import src.widget as W
+from src.textBuffer import *
 
 TextEditor = W.newWidget("TextEditor", (
 	"textBuffer",
 ))
 
 def keyPressHandler(textEditor, key):
-	return W.keyPressChildren(textEditor, key)
+	a, b = W.keyPressChildren(textEditor, key)
+	print(b, "qqqqqqq")
+	return a
 	# Тут смысл был в том чтоб в params еще передать родителя.
 	# params["textBox"] = self.children["textBox"]
 	# self.children["textBox"].eventDispatcher.emit("keyPress", params)
@@ -45,9 +43,13 @@ def createTextEditor(name, x, y, width, height):
 
 	textEditor.textBuffer.setTextFromFile("assets/text.txt")
 
-	tb = tBox.createTextBox(textEditor, "textBox", 0, 0, 800, 400)
+	tb = tBox.createTextBox(textEditor, "textBox",
+		textEditor.x, 20, textEditor.width, textEditor.height - 20)
+	menu = Mn.createMenu("menu",
+		textEditor.x, textEditor.y, textEditor.width, 20)
 	tb = tb._replace(textBuffer = textEditor.textBuffer)
 	tb = tBox.setTextBuffer(tb, textEditor.textBuffer)
 	#var_dump(tb)
 	textEditor = W.addChild(textEditor, "textBox", tb)
+	textEditor = W.addChild(textEditor, "menu", menu)
 	return textEditor

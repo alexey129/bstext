@@ -1,7 +1,9 @@
 import wx
 
-from src.event import *
 from config.viewConfig import viewConfig
+from lib.bslib.log import *
+from src.event import *
+
 
 def hex_to_rgb(hex_color):
 	"""
@@ -24,7 +26,7 @@ def drawText(canvas, text, x, y, color = None):
 		wx.FONTWEIGHT_NORMAL, faceName="hack")
 	canvas.SetFont(font)
 	if color is None:
-		r, g, b = hex_to_rgb(viewConfig["textBoxFontColor"])
+		r, g, b = hex_to_rgb(getValTup(viewConfig, "textBoxFontColor"))
 	else:
 		r, g, b = hex_to_rgb(color)
 	canvas.SetTextForeground(wx.Colour(r, g, b))
@@ -112,6 +114,15 @@ def setKeyUpEventHandler(window, func):
 def setMouseWheelEventHandler(window, func):
 	window.frame.Bind(wx.EVT_MOUSEWHEEL, func)
 
+def setMouseLeftHandler(window, func):
+	window.frame.Bind(wx.EVT_LEFT_DOWN, func)
+
+def setMouseRightHandler(window, func):
+	window.frame.Bind(wx.EVT_RIGHT_DOWN, func)
+
+def setMouseMoveHandler(window, func):
+	window.frame.Bind(wx.EVT_MOTION, func)
+
 # Рисует окно на экране.
 def runWindow(window):
 	window.frame.Show(True)
@@ -123,11 +134,13 @@ def updateWindow(window):
 	window.frame.Update()
 
 def createApp():
+	app = wx.App()
+	width, height = wx.GetDisplaySize()
 	newApp = Window(
-		app = wx.App(),
-		frame = wx.Frame(parent=None, title="BSText", size=(1000, 500)),
-		width = 1000,
-		height = 500,
+		app = app,
+		frame = wx.Frame(parent=None, title="BSText", size=(width//2, height//2)),
+		width = width,
+		height = height,
 		run = runFunc,
 		rootWidget = None,
 	)
@@ -139,6 +152,8 @@ def createApp():
 # функцию для перерисовки.
 def runFunc(window):
 	rootWidget = window.rootWidget
+	# Разворачиваем окно на весь экран.
+	#window.frame.Maximize()
 
 	def keyPressHandler(key):
 		nonlocal rootWidget
@@ -196,6 +211,18 @@ def runFunc(window):
 			# Обработка других нажатий клавиш
 			event1.Skip()
 
+	def mouseButtonHandler(event):
+		# Получаем координаты курсора
+		x, y = event.GetPosition()
+		
+		# Обработка события
+		if event.LeftIsDown():
+			keyPressHandler("mouseLeft_"+str(x)+"_"+str(y))
+		elif event.RightIsDown():
+			keyPressHandler("mouseRight_"+str(x)+"_"+str(y))
+		# elif event.Moving():
+			# keyPressHandler("mouseMove_"+str(x)+"_"+str(y))
+
 	setRenderEventHandler(window, renderEventHandler)
 
 	setCharKeyEventHandler(window, symbolPressHandler)
@@ -205,5 +232,11 @@ def runFunc(window):
 	setMouseWheelEventHandler(window, mouseWheelEventHandler)
 
 	setKeyUpEventHandler(window, keyRealizeHandler)
+
+	setMouseLeftHandler(window, mouseButtonHandler)
+
+	setMouseRightHandler(window, mouseButtonHandler)
+
+	setMouseMoveHandler(window, mouseButtonHandler)
 
 	runWindow(window)

@@ -1,14 +1,10 @@
-import src.event as event
-import src.textArea as tArea
-from src.selection import *
-from src.textBuffer import *
-import src.textNumber as TextNumber
-from config.viewConfig import viewConfig
 import lib.bsgui as gui
-from var_dump import var_dump
-from collections import namedtuple
-from lib.bslib.log import *
+import src.textArea as tArea
+import src.textNumber as TextNumber
 import src.widget as W
+from lib.bslib.func import *
+from config.viewConfig import viewConfig
+from src.selection import *
 
 def getLeftSideStr(string, index):
 	"""
@@ -149,8 +145,8 @@ def keyPressHandler(textbox, key):
 	ta = tArea.setCursor(ta, cursor)
 	textbox = W.setChild(textbox, "textArea", ta)
 
-	textbox = W.keyPressChildren(textbox, key)
-	return textbox
+	textbox, upEvents = W.keyPressChildren(textbox, key)
+	return textbox, upEvents
 	#textbox.window.updateWindow()
 
 def render(textBox, canvas):
@@ -160,7 +156,7 @@ def render(textBox, canvas):
 		textBox.y,
 		textBox.width,
 		textBox.height,
-		viewConfig["textBoxBackgroundColor"])
+		getValTup(viewConfig, "textBoxBackgroundColor"))
 
 	if textBox.textBuffer.selection is not None:
 		selectionRender(
@@ -202,7 +198,8 @@ def createTextBox(parent, name, x, y, width, height):
 		textBuffer = None
 	)
 
-	ta = tArea.createTextArea(textBox, "textArea", 20, 0, 800, 400)
+	ta = tArea.createTextArea(textBox, "textArea",
+		textBox.x + 20, textBox.y, textBox.width - 20, textBox.height)
 	#ta = tArea.setTextBuffer(ta, textBox.textBuffer)
 	tn = TextNumber.createTextNumber(textBox, "textNumber", 0, 0, 20, 400)
 	#tn = TextNumber.setTextBuffer(tn, textBox.textBuffer)

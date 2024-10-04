@@ -1,5 +1,6 @@
 from lib.bslib.func import *
 
+
 class EventDispatcher:
 	def __init__(self):
 		self.events = {}

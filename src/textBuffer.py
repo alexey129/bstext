@@ -1,7 +1,9 @@
 import copy
+
 from var_dump import var_dump
 
 import lib.bslib.string as strlib
+
 
 class ViewLine:
 	"""

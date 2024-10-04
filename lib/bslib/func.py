@@ -1,8 +1,9 @@
 # Функции для функционального программирования.
 
-from pyrsistent import pvector, pmap
 import copy
 from collections import namedtuple
+
+from pyrsistent import pmap, pvector
 
 # def mergeNamedtuples(tuple1, tuple2):
 # 	"""
